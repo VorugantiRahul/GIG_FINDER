@@ -79,26 +79,36 @@ class User {
     required this.updatedAt,
   });
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'email': email,
-    'name': name,
-    'age': age,
-    'profile_photo_path': profilePhotoPath,
-    'mobile_number': mobileNumber,
-    'skills': skills,
-    'interests': interests,
-    'resume_path': resumePath,
-    'role': role,
-    'location': location,
-    'student_info': studentInfo?.toJson(),
-    'employee_info': employeeInfo?.toJson(),
-    'others': others,
-    'is_profile_complete': isProfileComplete,
-    'is_admin': isAdmin,
-    'created_at': createdAt.toIso8601String(),
-    'updated_at': updatedAt.toIso8601String(),
-  };
+  Map<String, dynamic> toJson() {
+    final json = {
+      'id': id,
+      'email': email,
+      'name': name,
+      'age': age,
+      'profile_photo_path': profilePhotoPath,
+      'mobile_number': mobileNumber,
+      'skills': skills,
+      'interests': interests,
+      'resume_path': resumePath,
+      'role': role,
+      'location': location,
+      'others': others,
+      'is_profile_complete': isProfileComplete,
+      'is_admin': isAdmin,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+    
+    // Only include student_info and employee_info if they're not null
+    if (studentInfo != null) {
+      json['student_info'] = studentInfo!.toJson();
+    }
+    if (employeeInfo != null) {
+      json['employee_info'] = employeeInfo!.toJson();
+    }
+    
+    return json;
+  }
 
   factory User.fromJson(Map<String, dynamic> json) => User(
     id: json['id'] ?? '',

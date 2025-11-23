@@ -408,7 +408,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     _isLoading = true;
                                     _errorMessage = '';
                                   });
-                                    try {
+                                  try {
                                     final ok = await AuthService.verifyOtp(context, _emailController.text.trim(), _otpController.text.trim());
                                     if (ok) {
                                       // After OTP verification Supabase should set the current user.
@@ -421,29 +421,55 @@ class _LoginScreenState extends State<LoginScreen> {
                                       }
 
                                       if (currentId == null || currentId.isEmpty) {
-                                        setState(() { _errorMessage = 'Failed to determine authenticated user after OTP'; });
+                                        if (mounted) {
+                                          setState(() { _errorMessage = 'Failed to determine authenticated user after OTP'; });
+                                        }
                                       } else {
-                                        final user = ModelUser.User(
-                                          id: currentId,
-                                          email: _emailController.text.trim(),
-                                          createdAt: DateTime.now(),
-                                          updatedAt: DateTime.now(),
-                                        );
-                                        final created = await UserService.createProfile(user);
-                                        if (created) {
+                                        // Check if profile already exists
+                                        final existingProfile = await UserService.getProfile(currentId);
+                                        
+                                        if (existingProfile != null) {
+                                          // Profile exists, navigate to setup or home
                                           if (!mounted) return;
-                                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (c) => const ProfileSetupScreen()));
+                                          Navigator.of(context).pushReplacement(
+                                            MaterialPageRoute(builder: (c) => const ProfileSetupScreen())
+                                          );
                                         } else {
-                                          setState(() { _errorMessage = 'Sign up failed: could not create profile'; });
+                                          // Create new profile
+                                          final user = ModelUser.User(
+                                            id: currentId,
+                                            email: _emailController.text.trim(),
+                                            createdAt: DateTime.now(),
+                                            updatedAt: DateTime.now(),
+                                          );
+                                          final created = await UserService.createProfile(user);
+                                          if (created) {
+                                            if (!mounted) return;
+                                            Navigator.of(context).pushReplacement(
+                                              MaterialPageRoute(builder: (c) => const ProfileSetupScreen())
+                                            );
+                                          } else {
+                                            if (mounted) {
+                                              setState(() { _errorMessage = 'Sign up failed: could not create profile. Please try again.'; });
+                                            }
+                                          }
                                         }
                                       }
                                     } else {
-                                      setState(() { _errorMessage = 'OTP verification failed'; });
+                                      if (mounted) {
+                                        setState(() { _errorMessage = 'OTP verification failed. Please check the code.'; });
+                                      }
                                     }
                                   } catch (e) {
-                                    setState(() { _errorMessage = 'Error: ${e.toString()}'; });
+                                    if (mounted) {
+                                      setState(() { 
+                                        _errorMessage = 'Error: ${e.toString().replaceAll('Exception: ', '')}'; 
+                                      });
+                                    }
                                   } finally {
-                                    setState(() { _isLoading = false; });
+                                    if (mounted) {
+                                      setState(() { _isLoading = false; });
+                                    }
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(

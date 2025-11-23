@@ -13,7 +13,8 @@ class UserService {
       );
 
       if (existingUser != null) {
-        throw Exception('User profile already exists');
+        print('User profile already exists, skipping creation');
+        return true; // Return true since profile exists
       }
 
       // Add new user
@@ -22,9 +23,10 @@ class UserService {
         updatedAt: DateTime.now(),
       );
       
-      await SupabaseService.insert('users', updatedUser.toJson());
+      final result = await SupabaseService.insert('users', updatedUser.toJson());
+      print('Profile created successfully: ${result.isNotEmpty}');
       
-      return true;
+      return result.isNotEmpty;
     } catch (e) {
       print('Failed to create profile: $e');
       return false;
