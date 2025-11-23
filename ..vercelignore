@@ -1,0 +1,3 @@
+# Don't ignore the build directory as it contains our pre-built web files
+!build/
+!build/web/

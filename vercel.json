@@ -1,8 +1,7 @@
 {
-  "buildCommand": "chmod +x build.sh && ./build.sh",
+  "buildCommand": "echo 'Using pre-built Flutter web files'",
   "outputDirectory": "build/web",
-  "installCommand": "echo 'Flutter will be installed during build'",
-  "framework": null,
+  "installCommand": "echo 'No installation needed'",
   "rewrites": [
     {
       "source": "/(.*)",
